@@ -73,9 +73,9 @@ def callback():
     icon_url = user_info['profile_image_url_https']
     name=user_info['name']
 
-    return jsonify({'username':username,'icon_url':icon_url,'name':name})
-    #return jsonify(access_token)
-
+    #return jsonify({'username':username,'icon_url':icon_url,'name':name})
+    return render_template("hello.html",user_info=user_info)
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
