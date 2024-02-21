@@ -14,8 +14,10 @@ twitter_base_url = 'https://api.twitter.com'
 authorization_endpoint = twitter_base_url + '/oauth/authenticate'
 request_token_endpoint = twitter_base_url + '/oauth/request_token'
 token_endpoint = twitter_base_url + '/oauth/access_token'
+credentials=twitter_base_url + '/1.1/account/verify_credentials.json'
 
 app = Flask(__name__)
+app.json.ensure_ascii=False
 
 @app.route("/")
 def index():
@@ -58,14 +60,21 @@ def callback():
         oauth_token
     )
 
-    res = twitter.post(
-        token_endpoint,
-        params={'oauth_verifier': oauth_verifier}
-    )
+    res=twitter.post(token_endpoint,params={'oauth_verifier': oauth_verifier})
 
     access_token = dict(parse.parse_qsl(res.content.decode("utf-8")))
 
-    return jsonify(access_token)
+    twitter = OAuth1Session(api_key, api_secret, access_token['oauth_token'], access_token['oauth_token_secret'])
+    response = twitter.get('https://api.twitter.com/1.1/account/verify_credentials.json')
+    user_info = response.json()
+
+    # ユーザー名とアイコンのURLを取得
+    username = user_info['screen_name']
+    icon_url = user_info['profile_image_url_https']
+    name=user_info['name']
+
+    return jsonify({'username':username,'icon_url':icon_url,'name':name})
+    #return jsonify(access_token)
 
 
 if __name__ == "__main__":
